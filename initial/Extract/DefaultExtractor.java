@@ -37,7 +37,7 @@ public class DefaultExtractor implements Extractionable {
 		for( int i = SupportClassForDefaultExatractor.getNextEnteringAHREF(aPage, -1); i < aPage.length();
 			i = SupportClassForDefaultExatractor.getNextEnteringAHREF(aPage, i) ) {
 			StringBuilder sb = new StringBuilder();
-			for( int j = 1; aPage.charAt( i + j ) != '"'; ++j ) {
+			for( int j = 1; aPage.charAt( i + j ) != '"' && aPage.charAt( i + j ) != '\'' ; ++j ) {
 				sb.append(aPage.charAt(i + j) );
 			}
 			res.add( baseUri.resolve(sb.toString() ).toString()  );
@@ -67,7 +67,7 @@ class SupportClassForDefaultExatractor {
 			}
 			if( shift == ahref.length() ) {
 				res = i + ahref.length();
-				for( ;res < text.length() && text.charAt(res) != '"'; ++res );
+				for( ;res < text.length() && text.charAt(res) != '"' && text.charAt(res) != '\''; ++res );
 				return res;
 			}
 		}
