@@ -26,7 +26,7 @@ public class DefaultExtractor implements Extractionable {
 			aStringBuilder.append( aScanner.nextLine() );
 			aStringBuilder.append("\n");
 		}
-		aPage = aStringBuilder.toString();
+		aPage = aStringBuilder.toString().toLowerCase();
 	}
 	public String getPage() {
 		return aPage;
@@ -34,8 +34,8 @@ public class DefaultExtractor implements Extractionable {
 	@Override
 	public ArrayList<String> getLinks() {
 		ArrayList<String> res = new ArrayList<String>();
-		for( int i = SupportClassForDefaultExatractor.getNextEnteringAHREF(aPage, -1); i < aPage.length();
-			i = SupportClassForDefaultExatractor.getNextEnteringAHREF(aPage, i) ) {
+		for( int i = getNextEnteringAHREF( -1 ); i < aPage.length();
+			i = getNextEnteringAHREF( i ) ) {
 			StringBuilder sb = new StringBuilder();
 			for( int j = 1; aPage.charAt( i + j ) != '"' && aPage.charAt( i + j ) != '\'' ; ++j ) {
 				sb.append(aPage.charAt(i + j) );
@@ -46,31 +46,41 @@ public class DefaultExtractor implements Extractionable {
 	}
 	@Override
 	public ArrayList<String> getWords() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<String> res = new ArrayList<String>();
+		for( int i = 0; i < aPage.length(); ) {
+			StringBuilder aStringBuilder = new StringBuilder();
+			for( ;isGoodChar( aPage.charAt( i ) ) && i < aPage.length(); ++i ) {
+				aStringBuilder.append( aPage.charAt( i ) );
+			}
+			if( aStringBuilder.length() != 0 )  {			
+				res.add( aStringBuilder.toString() );
+			} else {
+				++i;
+			}
+		}
+		return res;
 	}
-	private String aPage;
-	private URI baseUri;
-}
-
-
-class SupportClassForDefaultExatractor {
-	static int getNextEnteringAHREF( String text, int from ) {
+	private static boolean isGoodChar( char ch ) {
+		return ( ch >= 'à' && ch <= 'ÿ' );
+	}
+	private int getNextEnteringAHREF( int from ) {
 		int res = -1;
 		String ahref = "a href";
-		for( int i = from + 1; i < text.length() - ahref.length(); ++i ) {
+		for( int i = from + 1; i < aPage.length() - ahref.length(); ++i ) {
 			int shift = 0;
 			for( ;shift < ahref.length(); ++shift ) { 
-				if( ahref.charAt(shift) != text.charAt(shift + i) ) {  
+				if( ahref.charAt(shift) != aPage.charAt(shift + i) ) {  
 					break;
 				}
 			}
 			if( shift == ahref.length() ) {
 				res = i + ahref.length();
-				for( ;res < text.length() && text.charAt(res) != '"' && text.charAt(res) != '\''; ++res );
+				for( ;res < aPage.length() && aPage.charAt(res) != '"' && aPage.charAt(res) != '\''; ++res );
 				return res;
 			}
 		}
-		return text.length();
+		return aPage.length();
 	}
+	private String aPage;
+	private URI baseUri;
 }
