@@ -7,5 +7,5 @@ import java.util.ArrayList;
 public interface Extractionable {
 	ArrayList<String> getLinks();
 	ArrayList<String> getWords();
-	void setPage(URL aUrl) throws IOException;
+	void setPage(URL aUrl);
 }

@@ -13,18 +13,34 @@ public class DefaultExtractor implements Extractionable {
 		// TODO Auto-generated constructor stub
 	}
 	@Override
-	public void setPage( URL aUrl ) throws IOException {
+	public void setPage( URL aUrl ) {
+		aPage = "";
 		try {
 			baseUri = aUrl.toURI();
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println( "Не правильный url..." );
 		}
-		Scanner aScanner = new Scanner( aUrl.openStream() );
+		Scanner aScanner = null;
+		try {
+			aScanner = new Scanner( aUrl.openStream() );
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.err.println( "Не возможно открыть страничку " + aUrl.toString() );
+		}
 		StringBuilder aStringBuilder = new StringBuilder("");
-		while( aScanner.hasNextLine() ) { 
-			aStringBuilder.append( aScanner.nextLine() );
-			aStringBuilder.append("\n");
+		try {
+			while( aScanner != null && aScanner.hasNextLine() ) {
+				String tmpStr = aScanner.nextLine();
+				if( aStringBuilder.length() + tmpStr.length() > 100000 || tmpStr.length() > 10000 ) {
+					throw new Exception();
+				}
+				aStringBuilder.append(tmpStr);
+//				System.out.print(aStringBuilder.toString());
+				aStringBuilder.append("\n");
+			}
+		} catch( Exception e ) {
+			System.err.println( "Че - то не так с документом...( возмоно он очень большой ) " + aUrl.toString() );
 		}
 		aPage = aStringBuilder.toString().toLowerCase();
 	}
@@ -40,7 +56,12 @@ public class DefaultExtractor implements Extractionable {
 			for( int j = 1; aPage.charAt( i + j ) != '"' && aPage.charAt( i + j ) != '\'' ; ++j ) {
 				sb.append(aPage.charAt(i + j) );
 			}
-			res.add( baseUri.resolve(sb.toString() ).toString()  );
+			try {
+				String tmpPage = baseUri.resolve(sb.toString() ).toString();
+				res.add(tmpPage);
+			} catch( Exception e ) {
+				System.err.println( "Ошибка парсинга..." + sb.toString() + " " + baseUri.toString() );
+			}
 		}
 		return res;
 	}
