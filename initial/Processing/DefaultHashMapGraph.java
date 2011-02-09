@@ -20,6 +20,9 @@ import Extract.Extractionable;
 public class DefaultHashMapGraph implements Graph {
 	public DefaultHashMapGraph( String aName, URL aUrl, Extractionable aExtractionable, Indexable aIndexator ) {
 		indexator = aIndexator;
+		if( indexator != null ) {
+			indexator.beginIndexable();
+		}
 		LinkedList<String> aQueue = new LinkedList<String>();
 		aQueue.push( aUrl.toString());
 		while( !aQueue.isEmpty() ) {
@@ -40,11 +43,15 @@ public class DefaultHashMapGraph implements Graph {
 					}
 					aQueue.addAll( edges.get(curPage) );
 				} catch ( Exception e ) {
+					e.printStackTrace();
 					if( indexator != null ) {
 						indexator.indexError( "чё - то не то..." + curPage );
 					}
 				}
 			}
+		}
+		if( indexator != null ) {
+			indexator.endIndexable();
 		}
 	}
 //	public DefaultHashMapGraph( String aName, URL aUrl, Extractionable aExtractionable, Indexable aIndexator ) {

@@ -10,8 +10,7 @@ public class Resulter {
 		Scanner s = new Scanner(new File( "config.txt" ));
 		String aClassName = s.nextLine();
 		s.close();
-		System.out.println( aClassName );
-		aResulter = (Resultable)(Class.forName("result.testClass").newInstance());
+		aResulter = (Resultable)(Class.forName(aClassName).newInstance());
 		aResulter.setRequest(request);
 		aResulter.processing();
 	}

@@ -32,7 +32,7 @@ public class DefaultExtractor implements Extractionable {
 		try {
 			while( aScanner != null && aScanner.hasNextLine() ) {
 				String tmpStr = aScanner.nextLine();
-				if( aStringBuilder.length() + tmpStr.length() > 100000 || tmpStr.length() > 10000 ) {
+				if( aStringBuilder.length() + tmpStr.length() > 200000 ) {
 					throw new Exception();
 				}
 				aStringBuilder.append(tmpStr);

@@ -22,8 +22,7 @@ public class TriplexTree {
 		in.close();
 	}
 	public int add( String aWord ) {
-		setWord( aRood, aWord, 0 );
-		return numberOFCurWord - 1;
+		return setWord(aRood, aWord, 0);
 	}
 	public int getNumberOfWord( String aWord ) {
 		return getNumberOfWord(aRood, aWord, 0);
