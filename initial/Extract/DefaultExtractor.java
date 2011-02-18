@@ -2,11 +2,21 @@ package Extract;
 
 
 import java.io.IOException;
+import org.mozilla.universalchardet.UniversalDetector;
+//import org.mozilla.unisalchardet.
+
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import javax.swing.text.html.HTMLDocument.HTMLReader;
 
 public class DefaultExtractor implements Extractionable {
 	public DefaultExtractor() {
@@ -19,30 +29,23 @@ public class DefaultExtractor implements Extractionable {
 			baseUri = aUrl.toURI();
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
 			System.err.println( "Не правильный url..." );
 		}
-		Scanner aScanner = null;
+		InputStream in = null;
 		try {
-			aScanner = new Scanner( aUrl.openStream() );
+			in = aUrl.openStream();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
 			System.err.println( "Не возможно открыть страничку " + aUrl.toString() );
 		}
-		StringBuilder aStringBuilder = new StringBuilder("");
 		try {
-			while( aScanner != null && aScanner.hasNextLine() ) {
-				String tmpStr = aScanner.nextLine();
-				if( aStringBuilder.length() + tmpStr.length() > 200000 ) {
-					throw new Exception();
-				}
-				aStringBuilder.append(tmpStr);
-//				System.out.print(aStringBuilder.toString());
-				aStringBuilder.append("\n");
-			}
+			aPage = CharacterDetector.getPage(aUrl.toString());
 		} catch( Exception e ) {
+			e.printStackTrace();
 			System.err.println( "Че - то не так с документом...( возмоно он очень большой ) " + aUrl.toString() );
-		}
-		aPage = aStringBuilder.toString().toLowerCase();
+		} 
 	}
 	public String getPage() {
 		return aPage;
@@ -50,8 +53,7 @@ public class DefaultExtractor implements Extractionable {
 	@Override
 	public ArrayList<String> getLinks() {
 		ArrayList<String> res = new ArrayList<String>();
-		for( int i = getNextEnteringAHREF( -1 ); i < aPage.length();
-			i = getNextEnteringAHREF( i ) ) {
+		for( int i = getNextEnteringAHREF( -1 ); i < aPage.length(); i = getNextEnteringAHREF( i ) ) {
 			StringBuilder sb = new StringBuilder();
 			for( int j = 1; aPage.charAt( i + j ) != '"' && aPage.charAt( i + j ) != '\'' ; ++j ) {
 				sb.append(aPage.charAt(i + j) );
@@ -67,11 +69,14 @@ public class DefaultExtractor implements Extractionable {
 	}
 	@Override
 	public ArrayList<String> getWords() {
+		return getWords( aPage );
+	}
+	protected ArrayList<String> getWords( String aString ) {
 		ArrayList<String> res = new ArrayList<String>();
-		for( int i = 0; i < aPage.length(); ) {
+		for( int i = 0; i < aString.length(); ) {
 			StringBuilder aStringBuilder = new StringBuilder();
-			for( ;isGoodChar( aPage.charAt( i ) ) && i < aPage.length(); ++i ) {
-				aStringBuilder.append( aPage.charAt( i ) );
+			for( ; i < aString.length() && isGoodChar( aString.charAt( i ) ) ; ++i ) {
+				aStringBuilder.append( aString.charAt( i ) );
 			}
 			if( aStringBuilder.length() != 0 )  {			
 				res.add( aStringBuilder.toString() );
@@ -81,9 +86,9 @@ public class DefaultExtractor implements Extractionable {
 		}
 		return res;
 	}
-	private static boolean isGoodChar( char ch ) {
+	protected boolean isGoodChar( char ch ) {
 		return ( ch >= 'а' && ch <= 'я' );
-	}
+	}	
 	private int getNextEnteringAHREF( int from ) {
 		int res = -1;
 		String ahref = "a href";
@@ -102,6 +107,39 @@ public class DefaultExtractor implements Extractionable {
 		}
 		return aPage.length();
 	}
-	private String aPage;
+	protected String aPage;
 	private URI baseUri;
+}
+
+class CharacterDetector {
+    private static CharacterDetector instance;
+    private CharacterDetector() {}
+    private UniversalDetector detector = new UniversalDetector(null);
+    public static final CharacterDetector getInstance(){
+        if ( instance == null ) instance = new CharacterDetector();
+        return instance;
+    }
+    public String detect(InputStream stream) throws IOException {
+        // Reset detector before using
+        detector.reset();
+        try {
+    		byte[] buffer = new byte[200000];
+    		int i = 0;
+    		int len = 0;
+    		while( ( len = stream.read( buffer, i, 1000 ) ) != -1 ) {
+    			i += len;
+    		}
+    		detector.handleData(buffer, 0, i);
+            detector.dataEnd();
+            String aCharset = detector.getDetectedCharset();
+            return new String( new String( buffer, 0, i ).getBytes(), aCharset );
+        } finally {
+            detector.reset();
+        }
+    }
+    public static String getPage( String aPage ) throws IOException {
+		CharacterDetector cd = CharacterDetector.getInstance();
+		URL aUrl = new URL( aPage );
+		return cd.detect( aUrl.openStream() ).toLowerCase();
+    }
 }

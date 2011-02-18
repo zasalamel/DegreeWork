@@ -18,16 +18,30 @@ import java.util.concurrent.DelayQueue;
 import Extract.Extractionable;
 
 public class DefaultHashMapGraph implements Graph {
-	public DefaultHashMapGraph( String aName, URL aUrl, Extractionable aExtractionable, Indexable aIndexator ) {
+	public DefaultHashMapGraph( ArrayList<String> aStartPages, Extractionable aExtractionable, Indexable aIndexator ) {
 		indexator = aIndexator;
+		extractor = aExtractionable;
 		if( indexator != null ) {
 			indexator.beginIndexable();
 		}
+		for (String aPage : aStartPages) {
+			try {
+				processing(aPage);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+		}
+		if( indexator != null ) {
+			indexator.endIndexable();
+		}
+	}
+	private void processing( String aStartPage ) throws MalformedURLException {
+		URL aUrl = new URL(aStartPage);
 		LinkedList<String> aQueue = new LinkedList<String>();
-		aQueue.push( aUrl.toString());
+		aQueue.push( aStartPage );
 		while( !aQueue.isEmpty() ) {
 			String curPage = aQueue.pop();
-			if( edges.get( curPage ) == null && curPage.contains(aName) ) {
+			if( edges.get( curPage ) == null && curPage.contains(aUrl.getHost()) && !isFile(curPage) ) {
 				if( indexator != null ) {
 					indexator.indexLink( curPage );
 				}
@@ -36,10 +50,10 @@ public class DefaultHashMapGraph implements Graph {
 					continue;
 				} 
 				try {
-					aExtractionable.setPage(new URL(curPage));
-					edges.put( curPage , new HashSet<String>( aExtractionable.getLinks() ) );
+					extractor.setPage(new URL(curPage));
+					edges.put( curPage , new HashSet<String>( extractor.getLinks() ) );
 					if( indexator != null ) {
-						indexator.indexPage( aExtractionable.getWords() );
+						indexator.indexPage( extractor.getWords() );
 					}
 					aQueue.addAll( edges.get(curPage) );
 				} catch ( Exception e ) {
@@ -50,15 +64,7 @@ public class DefaultHashMapGraph implements Graph {
 				}
 			}
 		}
-		if( indexator != null ) {
-			indexator.endIndexable();
-		}
 	}
-//	public DefaultHashMapGraph( String aName, URL aUrl, Extractionable aExtractionable, Indexable aIndexator ) {
-//		this( aName, aUrl, aExtractionable );
-//		indexator = aIndexator;
-//		this( aName, aUrl, aExtractionable );
-//	}
 	@Override
 	public Collection<String> getLinks(String aPage) {
 		return edges.get(aPage);
@@ -82,7 +88,8 @@ public class DefaultHashMapGraph implements Graph {
 		return false;
 	}
 	private Indexable indexator = null;
-	private String[] Extensions = new String[] { ".pdf", ".doc", ".avi", ".jpg", ".ppt", ".zip", ".rar", ".xls", ".gif", ".bmp" };
+	private Extractionable extractor = null;
+	private String[] Extensions = new String[] { ".pdf", ".doc", ".avi", ".jpg", ".ppt", ".zip", ".rar", ".xls", ".gif", ".bmp" , ".rtf"};
 	private HashMap<String, HashSet<String> > edges = new HashMap<String, HashSet<String>>();
 //	private HashMap<String, ArrayList<String> > values = new HashMap<String, ArrayList<String>>();
 }

@@ -87,22 +87,16 @@ class RankedIndexPage extends AbstractIndexPage {
 	}
 	@Override
 	public int getCount(int numberPage) {
-//		System.out.println(name);
-//		System.out.println( numberPage );
 		if( page == null || page.length < 2 ) {
 			return 0;
 		}
-//		System.out.println("&");
 		int minRes = 0;
-		int maxRes = page.length / 2;
+		int maxRes = page.length / 2 - 1;
 		while( minRes != maxRes ) {
-//			System.out.println( "x" + minRes );
-//			System.out.println( "y" + maxRes );
 			int p = ( minRes + maxRes ) / 2;
 			if( p == minRes ) {
 				break;
 			}
-//			System.out.println( page[p * 2] );
 			if( page[p * 2] < numberPage ) {
 				minRes = p + 1;
 			} else if( page[p * 2] > numberPage ) {
@@ -114,7 +108,6 @@ class RankedIndexPage extends AbstractIndexPage {
 		if( page[minRes * 2] == numberPage ) {
 			return page[2 * minRes + 1];
 		}
-//		System.out.println("&");
 		return 0;
 	}
 	@Override
@@ -124,7 +117,7 @@ class RankedIndexPage extends AbstractIndexPage {
 	public void testPrint() {
 		System.out.println( name );
 		for ( int val : page) {
-//			System.out.print( val + " " );
+			System.out.print( val + " " );
 		}
 		System.out.println();
 	}

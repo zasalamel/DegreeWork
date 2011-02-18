@@ -26,5 +26,8 @@ public class Resulter {
 	public String getName( int index ) {
 		return aResulter.getName(index);
 	}
+	public double getRank( int index  ) {
+		return aResulter.getRank(index);
+	}
 	private result.Resultable aResulter = null;
 }

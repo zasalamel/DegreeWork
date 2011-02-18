@@ -11,7 +11,7 @@ public class DefaultIndexator implements Indexable {
 	public DefaultIndexator() {}
 	@Override
 	public void indexError(String page) {
-		System.err.println( page );
+//		System.err.println( page );
 	}
 	@Override
 	public void indexLink(String page) {
@@ -20,19 +20,27 @@ public class DefaultIndexator implements Indexable {
 	}
 	@Override
 	public void indexPage(ArrayList<String> aPage) {
+/*		for (String string : aPage) {
+			System.out.println( string );
+		}*/
+		outIndex.println( curPage );
 		TreeMap<Integer, Integer> aIndexPage = new TreeMap<Integer, Integer>();
 		for (String aWord : aPage) {
-			if( !isBadWord(aWord) ) {
+			if( !DefaultMorphologicalDictionary.isStopWord(aWord) ) {
 				String aBaseWord = DefaultMorphologicalDictionary.getBase(aWord);
 				int numOfWord = dictionary.add(aBaseWord);
 				if( !aIndexPage.containsKey(numOfWord) ) {
 					aIndexPage.put(numOfWord, 0 );
+					if( idfInf.size() <= numOfWord ) {
+						idfInf.add(1);
+					} else {
+						idfInf.set(numOfWord, idfInf.get(numOfWord) + 1);
+					}
 				}
 				int countOfWord = aIndexPage.get(numOfWord);
 				aIndexPage.put(numOfWord, countOfWord + 1);
 			}
 		}
-		outIndex.println( curPage );
 		for ( Integer numOfWord: aIndexPage.keySet() ) {
 			int count = aIndexPage.get(numOfWord);
 			outIndex.print( numOfWord.toString() + " " + new Integer(count).toString() + " " );
@@ -57,6 +65,11 @@ public class DefaultIndexator implements Indexable {
 		// TODO Auto-generated method stub
 		try {
 			dictionary.save("dictionary");
+			PrintStream ps = new PrintStream("idf");
+			for (Integer aIntdex : idfInf) {
+				System.out.println( aIntdex + " " );
+			}
+			ps.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -66,4 +79,5 @@ public class DefaultIndexator implements Indexable {
 	private String curPage;
 	private TriplexTree dictionary = new TriplexTree();
 	private PrintStream outIndex = null;
+	private ArrayList<Integer> idfInf = new ArrayList<Integer>();
 }

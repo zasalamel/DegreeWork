@@ -46,4 +46,9 @@ public class testClass implements Resultable {
 			"http://university.tversu.ru/news/index976.html",
 			"http://university.tversu.ru/news/index1042.html"
 		};
+	@Override
+	public double getRank(int index) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

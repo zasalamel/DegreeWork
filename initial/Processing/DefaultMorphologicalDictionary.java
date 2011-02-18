@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 public class DefaultMorphologicalDictionary {
 	private static TreeMap<String, String> baseDictionary = new TreeMap<String, String>();
+	private static TreeSet<String> badWord = new TreeSet<String>();
 	static {
 		try {
 			System.out.println( "Begin loading morphological dictionary..." );
@@ -25,6 +26,8 @@ public class DefaultMorphologicalDictionary {
 					while( worder.hasMoreTokens() ) {
 						baseDictionary.put(worder.nextToken(), base);
 					}
+				} else {
+					badWord.add(worder.nextToken());
 				}
 			}
 			System.out.println( "End loading morphological dictionary..." );
@@ -41,6 +44,6 @@ public class DefaultMorphologicalDictionary {
 		return word;
 	}
 	public static boolean isStopWord( String word ) {
-		return !baseDictionary.containsKey(word);
+		return badWord.contains(word);
 	}
 }

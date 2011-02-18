@@ -7,4 +7,5 @@ public interface Resultable {
 	public String getAnswer( int index );
 	public String getSubText( int index );
 	public String getName( int index );
+	public double getRank( int index );
 }
