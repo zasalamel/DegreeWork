@@ -25,6 +25,7 @@ public class DefaultHashMapGraph implements Graph {
 			indexator.beginIndexable();
 		}
 		for (String aPage : aStartPages) {
+			System.out.println(aPage);
 			try {
 				processing(aPage);
 			} catch (MalformedURLException e) {

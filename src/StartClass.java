@@ -41,6 +41,7 @@ import Processing.DefaultHashMapGraph;
 import Processing.DefaultIndexator;
 import Processing.DefaultMorphologicalDictionary;
 import Processing.Graph;
+import Processing.SynonimDictionatry;
 import Processing.TriplexTree;
 //import javax.
 
@@ -57,86 +58,108 @@ public class StartClass {
 	 * @throws ClassNotFoundException 
 	 * @throws BadLocationException 
 	 */
+	private static boolean isNext( String word, String iner, int shift ) {
+		int res = 0;
+		for( ; res < iner.length() && res + shift < word.length() 
+			&& iner.charAt(res) == word.charAt(res + shift) ; ++res ) { }
+		return res == iner.length();
+	}
+	private static int nextInner( String word, char ch, int shift ) {
+		int res = shift;
+		while( res < word.length() && word.charAt(res) != ch ) {
+			++res;
+		}
+		return res;
+	}
+	private static String processing( String str ) {
+		StringBuilder res = new StringBuilder();
+		for( int i = 0; i < str.length(); ++i ) {
+			char ch = str.charAt(i);
+			if( ch == '[' ) { i = nextInner(str, ']', i); } else 
+			if( ch == '(' ) { i = nextInner(str, ')', i); } else
+			if( ch == '<' ) { i = nextInner(str, '>', i); } else
+			if( ch == '.' ) { break; } else
+			{ 
+				if( isNext(str, ";", i) ) {
+					res.append(',');
+				} else if( isNext(str, "см.", i) ) {
+					res.append(',');
+					i += 2;
+				} else if( isNext(str, "||", i) ) {
+					res.append(',');
+					++i;
+				} else {
+					res.append(str.charAt(i));
+				}
+			}
+		}
+		return res.toString();
+	}
+	private static boolean isgoodWord( String str ) {
+		for( int i = 0; i < str.length(); ++i ) {
+			char ch = str.charAt(i);
+			if( !( 'а' <= ch && ch <= 'я' ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+	private static String tokenerString( String str ) {
+		int count = 0;
+		StringBuilder res = new StringBuilder();
+		StringTokenizer st = new StringTokenizer(str, ",");
+		String fitstTocken = st.nextToken();
+		if( !isgoodWord( fitstTocken.trim() ) ) {
+			return "";
+		}
+		res.append(fitstTocken.trim());
+		while( st.hasMoreTokens() ) {
+			String aTocken = st.nextToken();
+			if( isgoodWord(aTocken.trim()) ) {
+				++count;
+				res.append(",");
+				res.append(aTocken.trim());
+			}
+		}
+		if( count == 0 )  {
+			return "";
+		} else {
+		   return res.toString();
+		}
+	}
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, BadLocationException {
-		ArrayList<String> al = new ArrayList<String>();
-//		al.add("http://university.tversu.ru");
-		al.add("http://university.tversu.ru/");
-//		al.add("http://pmkinfo.tversu.ru");
-		new DefaultHashMapGraph(al, new AdvansedExtractor(), new DefaultIndexator());
+		for (String string : SynonimDictionatry.getSynonim("телефон")) {
+			System.out.println( string );
+		} 
+//		generate();
+//		ArrayList<String> al = new ArrayList<String>();
+//		al.add( "http://university.tversu.ru/" );
+//		al.add("http://pmkinfo.tversu.ru/pmk/index.php");
+//		new DefaultHashMapGraph(al, new AdvansedExtractor(), new DefaultIndexator());
 
 	}
+	/**
+	 * @throws FileNotFoundException
+	 */
+	private static void generate() throws FileNotFoundException {
+		Scanner in = new Scanner(new File( "1.txt" ) );
+		String prev = in.nextLine().toLowerCase();
+		PrintWriter out = new PrintWriter("synonim_dis.txt");
+		while( in.hasNext() ) {
+			StringBuilder sb = new StringBuilder(prev);
+			while( in.hasNext() ) {
+				prev = in.nextLine().toLowerCase();
+				if( prev.length() > 0 && prev.charAt(0) == ' ' ) {
+					sb.append(prev.trim());
+				} else {
+					break;
+				}
+			}
+			String str = tokenerString(processing( sb.toString()));
+			if( str.length() > 0 ) {
+				out.println( str );
+			}
+		}
+		out.flush();
+	}
 }
-/*        HTMLEditorKit kit = new HTMLEditorKit();
-        HTMLDocument doc = (HTMLDocument) kit.createDefaultDocument();
-        doc.putProperty("IgnoreCharsetDirective", Boolean.TRUE);
-        kit.read(new InputStreamReader(new FileInputStream("C:\\Users\\SeeD\\Desktop\\Тверской государственный университет.mht"), "windows-1251"), doc, 0);
-        ElementIterator it = new ElementIterator(doc);
-        Element elem;
-        while ((elem = it.next()) != null) {
-        	System.out.println( elem.getName() );
-            if (elem.getName().equals("link")) {*/
-//            	((HTMLDocument.BlockElement) elem).
- //           	System.out.println( elem.getAttributes().toString() );
-//            	AttributeSet as = elem.getAttributes();
- //           	Set<String> qwe = (Set<String>)(as.getAttributeNames() );
-//            	for ( String string :  ) {
- //           		System.out.println( string );	
-//				}
-            	
-//            	System.out.println( as.toString() );
-            	
-       //     	for ( Object string : as.getAttributeNames()) {
-					
-	//			}
-//                String s = (String) elem.getAttributes().getAttribute("tppabs");
-/*                if (s != null) {
-                    if (elem instanceof HTMLDocument.BlockElement) {
- //                       ((HTMLDocument.BlockElement) elem).removeAttribute("tppabs");
- //                       ((HTMLDocument.BlockElement) elem).removeAttribute(HTML.Attribute.SRC);
- //                       ((HTMLDocument.BlockElement) elem).addAttribute(HTML.Attribute.SRC, s);
-                    } else {
-                        if (elem instanceof HTMLDocument.RunElement) {
-//                            ((HTMLDocument.RunElement) elem).removeAttribute("tppabs");
- //                           ((HTMLDocument.RunElement) elem).removeAttribute(HTML.Attribute.SRC);
- //                           ((HTMLDocument.RunElement) elem).addAttribute(HTML.Attribute.SRC, s);
-                        }
-                    }
- //                   jTextArea1.append(s);
-                }*/
-//            }
- //       }
-//	URL aUrl = new URL("http://university.tversu.ru/docs/1479-%D0%BE.doc");
-//	System.out.println( aUrl. );
-//	File f = new File( "C:\\Users\\SeeD\\Desktop\\Лекции по аналитической геометрии МГУ.djvu" );
-//	File f = new File( aUrl.toString() );
-//	System.out.println( f.isHidden() );
-//		Resulter r = new Resulter("qwe");
-		
-//		System.out.println("qwe\nqwe");
-/*		Resulter r = new Resulter(request)
-		for( int i = 1; i <= r.getNumOfAnswers(); ++i ) {
-			System.out.println( r.getAnswer(i) );
-			System.out.println( r.getName(i) );
-			System.out.println( r.getSubText(i) );
-		}*/
-/*		String qwe = "qwe-qwe/qw.qweqwe.qwedsd...s";
-		StringTokenizer st = new StringTokenizer(qwe, "/-.");
-		while( st.hasMoreTokens() ) {
-			System.out.println( st.nextToken() );
-		}*/
-//		System.out.println("1");
-//		Hinter h = new Hinter("file://localhost/C:/Users/SeeD/Desktop/Тверской%20государственный%20университет.mht", "декан технологии");
-//		System.out.println( h.getBetter());
-/*		AdvansedExtractor ae = new AdvansedExtractor();
-		ae.setPage(new URL("file://localhost/C:/Users/SeeD/Desktop/Тверской%20государственный%20университет.mht"));
-		for (String string : ae.getParagraphs()  ) {
-			System.out.println(string);
-		}*/
-//		Hinter h = new Hinter("http://university.tversu.ru/", "");
-//		new DefaultHashMapGraph("university.tversu", new URL( "http://university.tversu.ru" ), new AdvansedExtractor(), new DefaultIndexator());
-/*		Scanner in = new Scanner( System.in );
-		for( String str = in.next(); !str.equals("!"); str = in.next() ) {
-			System.out.println( DefaultMorphologicalDictionary.getBase(str) );
-		}*/
-//	}
-//}

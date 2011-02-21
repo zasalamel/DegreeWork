@@ -20,9 +20,7 @@ public class DefaultIndexator implements Indexable {
 	}
 	@Override
 	public void indexPage(ArrayList<String> aPage) {
-/*		for (String string : aPage) {
-			System.out.println( string );
-		}*/
+		++numOfPage;
 		outIndex.println( curPage );
 		TreeMap<Integer, Integer> aIndexPage = new TreeMap<Integer, Integer>();
 		for (String aWord : aPage) {
@@ -66,8 +64,10 @@ public class DefaultIndexator implements Indexable {
 		try {
 			dictionary.save("dictionary");
 			PrintStream ps = new PrintStream("idf");
+			ps.println(numOfPage);
+			ps.println( idfInf.size() );
 			for (Integer aIntdex : idfInf) {
-				System.out.println( aIntdex + " " );
+				ps.print( aIntdex + " " );
 			}
 			ps.flush();
 		} catch (IOException e) {
@@ -76,6 +76,7 @@ public class DefaultIndexator implements Indexable {
 			System.exit(1);
 		}
 	}
+	private int numOfPage = 0;
 	private String curPage;
 	private TriplexTree dictionary = new TriplexTree();
 	private PrintStream outIndex = null;

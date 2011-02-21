@@ -38,11 +38,12 @@ public class AdvansedExtractor extends DefaultExtractor {
 						++i;
 					}
 					i += 8;					
-				}
-				while( i < aPage.length() && aPage.charAt(i) != '>' ) {
+				} else {
+					while( i < aPage.length() && aPage.charAt(i) != '>' ) {
+						++i;
+					}
 					++i;
 				}
-				++i;
 			} else {
 				StringBuilder sb = new StringBuilder();
 				while( i < aPage.length() && aPage.charAt(i) != '<' ) {
@@ -55,7 +56,7 @@ public class AdvansedExtractor extends DefaultExtractor {
 				}
 				if( isGood( sb.toString() ) ) {
 					aParagraphs.add(sb.toString());
-					System.out.println(sb.toString());
+//					System.out.println(sb.toString());
 				}
 //				System.out.println(sb.toString());
 			}

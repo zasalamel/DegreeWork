@@ -62,7 +62,10 @@ public class DefaultExtractor implements Extractionable {
 				String tmpPage = baseUri.resolve(sb.toString() ).toString();
 				res.add(tmpPage);
 			} catch( Exception e ) {
-				System.err.println( "Ошибка парсинга..." + sb.toString() + " " + baseUri.toString() );
+//				System.err.println( "Ошибка парсинга " + sb.toString() + " " + baseUri.toString() );
+				String str = myStupidAlgOfGetLink(baseUri.toString(), sb.toString());
+				System.err.println( "Ошибка парсинга " + sb.toString() + " " + baseUri.toString() + " заменено " + str );
+				res.add(str);
 			}
 		}
 		return res;
@@ -107,6 +110,32 @@ public class DefaultExtractor implements Extractionable {
 		}
 		return aPage.length();
 	}
+    private static String myStupidAlgOfGetLink( String prefix, String inPostfix ) {
+    	int shift = 0;
+    	while( inPostfix.charAt(shift) == '.' ) {
+    		++shift;
+    	}
+    	String postfix = inPostfix.substring(shift);
+    	int resShift = 0;
+    	int resCountEntry = getCountEntry(prefix, postfix, 0);
+    	for( int i = 1; i < prefix.length(); ++i ) {
+    		int p = getCountEntry(prefix, postfix, i);
+    		if( p > resCountEntry ) {
+    			resCountEntry = p;
+    			resShift = i;
+    		}
+    	}
+    	String res = prefix.substring(0, resShift);
+    	return res.concat(postfix);
+    }
+    private static int getCountEntry( String prefix, String postfix, int shift ) {
+    	int res = 0;
+    	while( res < postfix.length() && res + shift < prefix.length() 
+    			&& prefix.charAt(res + shift) == postfix.charAt(res) ) {
+    		++res;
+    	}
+    	return res;
+    }
 	protected String aPage;
 	private URI baseUri;
 }
@@ -132,7 +161,12 @@ class CharacterDetector {
     		detector.handleData(buffer, 0, i);
             detector.dataEnd();
             String aCharset = detector.getDetectedCharset();
-            return new String( new String( buffer, 0, i ).getBytes(), aCharset );
+            if( aCharset == null ) {
+//            	System.out.println( new String( buffer, 0, i ) );
+            	return new String( buffer, 0, i );            	
+            } else {
+            	return new String( new String( buffer, 0, i ).getBytes(), aCharset );
+            }
         } finally {
             detector.reset();
         }
