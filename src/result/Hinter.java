@@ -37,7 +37,7 @@ public class Hinter {
 		String resWord = "";
 		for (String  aPar : aParagraphs) {
 			double denuminator = numOfWord(aPar);
-			StringTokenizer st = new StringTokenizer(aReques, " -.!,?//\\" );
+			StringTokenizer st = new StringTokenizer(RankedIndexPage.getNormalRequest(aReques), " " );
 			String tmp = aPar;
 			while( st.hasMoreTokens() ) {
 				 tmp = addPrevAndPos(tmp, DefaultMorphologicalDictionary.getBase(st.nextToken()), "<b>", "</b>");

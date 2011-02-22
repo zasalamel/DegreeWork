@@ -31,8 +31,10 @@ import javax.swing.text.Element;
 
 import org.omg.PortableServer.AdapterActivator;
 
+import result.AbstractIndexPage;
 import result.Hinter;
 import result.IndexData;
+import result.RankedIndexPage;
 import result.Resulter;
 
 import Extract.AdvansedExtractor;
@@ -128,9 +130,11 @@ public class StartClass {
 		}
 	}
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, BadLocationException {
-		for (String string : SynonimDictionatry.getSynonim("телефон")) {
+		System.out.println( RankedIndexPage.getNormalRequest( "~книга мыла раму") );
+		for (String string : SynonimDictionatry.getSynonim("книга")) {
 			System.out.println( string );
-		} 
+		}
+//		System.out.println( Character.isJavaLetter('1') );
 //		generate();
 //		ArrayList<String> al = new ArrayList<String>();
 //		al.add( "http://university.tversu.ru/" );
